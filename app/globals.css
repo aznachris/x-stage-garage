@@ -1,26 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@400;700;900&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --font-orbitron: 'Orbitron', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-neon: #00AAFF;
+  --color-neon-dim: #0077cc;
+  --color-bg: #050608;
+  --color-surface: #0d0f12;
+  --color-surface-2: #12151a;
+  --color-border-subtle: #1a1f28;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #050608;
+  color: #d4d8e8;
+  font-family: 'JetBrains Mono', monospace;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Orbitron', sans-serif;
+}
+
+.neon-text {
+  color: #00AAFF;
+  text-shadow: 0 0 8px #00AAFF, 0 0 20px #00AAFF40, 0 0 40px #00AAFF20;
+}
+
+.neon-border {
+  border: 1px solid #00AAFF;
+  box-shadow: 0 0 8px #00AAFF40, inset 0 0 8px #00AAFF10;
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(0, 170, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 170, 255, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.glass-card {
+  background: rgba(13, 15, 18, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 170, 255, 0.12);
+}
+
+.glow-card {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+.glow-card:hover {
+  box-shadow: 0 0 24px #00AAFF25, 0 0 48px #00AAFF10;
+  border-color: rgba(0, 170, 255, 0.45);
+  transform: translateY(-4px);
+}
+
+.btn-neon {
+  background: transparent;
+  border: 1px solid #00AAFF;
+  color: #00AAFF;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.btn-neon:hover {
+  background: #00AAFF;
+  color: #000;
+  box-shadow: 0 0 10px #00AAFF, 0 0 30px #00AAFF60, 0 0 60px #00AAFF30;
+}
+
+.btn-neon-filled {
+  background: #00AAFF;
+  border: 1px solid #00AAFF;
+  color: #000;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.btn-neon-filled:hover {
+  background: transparent;
+  color: #00AAFF;
+  box-shadow: 0 0 10px #00AAFF, 0 0 30px #00AAFF60;
+}
+
+.input-neon {
+  background: rgba(0, 170, 255, 0.05);
+  border: 1px solid rgba(0, 170, 255, 0.2);
+  color: #d4d8e8;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.2s ease;
+  outline: none;
+}
+.input-neon:focus {
+  border-color: #00AAFF;
+  box-shadow: 0 0 12px #00AAFF30;
+  background: rgba(0, 170, 255, 0.08);
+}
+.input-neon::placeholder {
+  color: rgba(212, 216, 232, 0.3);
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #050608; }
+::-webkit-scrollbar-thumb { background: #0077cc; border-radius: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
