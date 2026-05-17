@@ -32,6 +32,7 @@ function genSlots(a: Avail): string[] {
 
 export default function Booking() {
   const { t, locale } = useTranslation();
+  const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState(1);
   const [service, setService] = useState("");
   const [date, setDate] = useState<Date | undefined>();
@@ -43,6 +44,8 @@ export default function Booking() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [slotsLoading, setSlotsLoading] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     fetch("/api/availability").then((r) => r.json()).then(setAvail);
@@ -215,13 +218,19 @@ export default function Booking() {
               <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }} className="flex-1 flex flex-col">
                 <p className="font-['JetBrains_Mono'] text-xs text-[#00AAFF]/60 uppercase tracking-widest mb-5">{t("booking.select.date")}</p>
                 <div className="flex justify-center booking-cal flex-1">
-                  <DayPicker
-                    mode="single"
-                    selected={date}
-                    onSelect={(d) => { setDate(d); if (d) { setTime(""); setStep(3); } }}
-                    disabled={isDisabled}
-                    locale={locale === "el" ? elLocale : enUS}
-                  />
+                  {mounted ? (
+                    <DayPicker
+                      mode="single"
+                      selected={date}
+                      onSelect={(d) => { setDate(d); if (d) { setTime(""); setStep(3); } }}
+                      disabled={isDisabled}
+                      locale={locale === "el" ? elLocale : enUS}
+                    />
+                  ) : (
+                    <div className="h-64 flex items-center justify-center">
+                      <span className="font-['JetBrains_Mono'] text-xs text-[#d4d8e8]/30">{t("loading")}</span>
+                    </div>
+                  )}
                 </div>
                 <div className="mt-6 flex justify-between">
                   <button onClick={() => setStep(1)} className="btn-neon h-10 px-6 text-xs rounded-sm">{t("booking.back")}</button>

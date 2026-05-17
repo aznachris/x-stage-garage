@@ -6,13 +6,14 @@ import { format } from "date-fns";
 import { el as elLocale } from "date-fns/locale";
 import {
   LogOut, RefreshCw, Calendar, ShoppingBag, Settings, Check, X,
-  Package, Images, Plus, Trash2, Upload, Pencil,
+  Package, Images, Plus, Trash2, Upload, Pencil, MessageSquare, Mail,
 } from "lucide-react";
 import type { Project } from "@/lib/projects";
+import type { Message } from "@/app/api/messages/route";
 
 type AppStatus = "pending" | "confirmed" | "cancelled";
 type OrderStatus = "new" | "processing" | "completed" | "cancelled";
-type Tab = "appointments" | "orders" | "availability" | "portfolio";
+type Tab = "appointments" | "orders" | "availability" | "portfolio" | "messages";
 
 interface Appointment {
   id: string; date: string; time: string; service: string;
@@ -53,13 +54,16 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-const BLANK_PROJECT = { title: "", category: "German" as const, specs: "", description: "", year: String(new Date().getFullYear()), color: "#1A2B3C", accent: "#00AAFF" };
+type ProjectForm = { title: string; category: "German" | "Japanese"; specs: string; description: string; year: string; color: string; accent: string };
+const BLANK_PROJECT: ProjectForm = { title: "", category: "German", specs: "", description: "", year: String(new Date().getFullYear()), color: "#1A2B3C", accent: "#00AAFF" };
 
 export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("appointments");
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [expandedMsgId, setExpandedMsgId] = useState<string | null>(null);
   const [avail, setAvail] = useState<Availability>({ workingDays: [1,2,3,4,5,6], startHour: 8, endHour: 18, slotDuration: 60, blockedDates: [] });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -81,19 +85,21 @@ export default function Dashboard() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [appsRes, ordersRes, availRes, projectsRes] = await Promise.all([
+    const [appsRes, ordersRes, availRes, projectsRes, msgsRes] = await Promise.all([
       fetch("/api/appointments"),
       fetch("/api/orders"),
       fetch("/api/availability"),
       fetch("/api/projects"),
+      fetch("/api/messages"),
     ]);
-    const [apps, ords, av, projs] = await Promise.all([
-      appsRes.json(), ordersRes.json(), availRes.json(), projectsRes.json(),
+    const [apps, ords, av, projs, msgs] = await Promise.all([
+      appsRes.json(), ordersRes.json(), availRes.json(), projectsRes.json(), msgsRes.json(),
     ]);
     setAppointments(apps);
     setOrders(ords);
     setAvail(av);
     setProjects(projs);
+    setMessages(msgs);
     setLoading(false);
   }, []);
 
@@ -179,10 +185,22 @@ export default function Dashboard() {
     if (expandedId === id) setExpandedId(null);
   };
 
+  const markMessageRead = async (id: string) => {
+    await fetch(`/api/messages/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ read: true }) });
+    setMessages((ms) => ms.map((m) => m.id === id ? { ...m, read: true } : m));
+  };
+
+  const deleteMessage = async (id: string) => {
+    await fetch(`/api/messages/${id}`, { method: "DELETE" });
+    setMessages((ms) => ms.filter((m) => m.id !== id));
+    if (expandedMsgId === id) setExpandedMsgId(null);
+  };
+
   const filteredApps = appFilter === "all" ? appointments : appointments.filter((a) => a.status === appFilter);
   const filteredOrders = orderFilter === "all" ? orders : orders.filter((o) => o.status === orderFilter);
   const pendingCount = appointments.filter((a) => a.status === "pending").length;
   const newOrdersCount = orders.filter((o) => o.status === "new").length;
+  const unreadMsgCount = messages.filter((m) => !m.read).length;
 
   const inputCls = "input-neon h-10 px-3 text-sm rounded-sm w-full";
 
@@ -212,6 +230,11 @@ export default function Dashboard() {
                 <ShoppingBag size={12} /> {newOrdersCount} νέες
               </span>
             )}
+            {unreadMsgCount > 0 && (
+              <span className="font-['JetBrains_Mono'] text-xs text-purple-400 flex items-center gap-1.5">
+                <Mail size={12} /> {unreadMsgCount} αδιάβαστα
+              </span>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -233,6 +256,7 @@ export default function Dashboard() {
             { key: "orders" as Tab, label: "Παραγγελίες", icon: ShoppingBag, count: newOrdersCount },
             { key: "availability" as Tab, label: "Διαθεσιμότητα", icon: Settings, count: 0 },
             { key: "portfolio" as Tab, label: "Portfolio", icon: Images, count: 0 },
+            { key: "messages" as Tab, label: "Μηνύματα", icon: MessageSquare, count: unreadMsgCount },
           ]).map(({ key, label, icon: Icon, count }) => (
             <button
               key={key}
@@ -637,6 +661,90 @@ export default function Dashboard() {
                 )}
               </div>
             ))}
+          </div>
+        )}
+        {/* ── Messages ── */}
+        {tab === "messages" && (
+          <div className="flex flex-col gap-3">
+            {loading ? (
+              <p className="font-['JetBrains_Mono'] text-sm text-[#d4d8e8]/40">Φόρτωση...</p>
+            ) : messages.length === 0 ? (
+              <div className="glass-card rounded-sm p-12 text-center">
+                <MessageSquare size={32} className="text-[#00AAFF]/30 mx-auto mb-4" />
+                <p className="font-['JetBrains_Mono'] text-sm text-[#d4d8e8]/40">Δεν υπάρχουν μηνύματα</p>
+              </div>
+            ) : (
+              messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`glass-card rounded-sm overflow-hidden border transition-colors ${
+                    !msg.read ? "border-purple-400/25 bg-purple-400/02" : "border-[#00AAFF]/08"
+                  }`}
+                >
+                  {/* Row */}
+                  <div
+                    className="flex items-center gap-4 p-4 cursor-pointer hover:bg-white/02 transition-colors"
+                    onClick={() => setExpandedMsgId((id) => id === msg.id ? null : msg.id)}
+                  >
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${!msg.read ? "bg-purple-400" : "bg-transparent"}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className="font-['Orbitron'] text-xs font-700 text-white">{msg.name}</span>
+                        <span className="font-['JetBrains_Mono'] text-[11px] text-[#d4d8e8]/40">{msg.email}</span>
+                        {msg.service && (
+                          <span className="font-['JetBrains_Mono'] text-[9px] text-[#00AAFF]/60 border border-[#00AAFF]/20 px-1.5 py-0.5 rounded-sm uppercase tracking-widest">
+                            {msg.service}
+                          </span>
+                        )}
+                      </div>
+                      <p className="font-['JetBrains_Mono'] text-xs text-[#d4d8e8]/45 mt-0.5 truncate">{msg.message}</p>
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className="font-['JetBrains_Mono'] text-[10px] text-[#d4d8e8]/30">
+                        {new Date(msg.createdAt).toLocaleDateString("el-GR")}
+                      </span>
+                      {!msg.read && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); markMessageRead(msg.id); }}
+                          title="Σήμανση ως αναγνωσμένο"
+                          className="w-8 h-8 flex items-center justify-center border border-purple-400/30 text-purple-400/70 hover:bg-purple-400/10 hover:text-purple-400 rounded-sm transition-all"
+                        >
+                          <Check size={13} />
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); deleteMessage(msg.id); }}
+                        className="w-8 h-8 flex items-center justify-center border border-transparent text-[#d4d8e8]/25 hover:border-red-400/30 hover:text-red-400 rounded-sm transition-all"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Expanded */}
+                  {expandedMsgId === msg.id && (
+                    <div className="border-t border-[#00AAFF]/08 px-5 py-4 flex flex-col gap-3 bg-white/01">
+                      {msg.phone && (
+                        <p className="font-['JetBrains_Mono'] text-xs text-[#d4d8e8]/50">
+                          <span className="text-[#00AAFF]/50 uppercase tracking-widest text-[10px] mr-2">Τηλ.</span>{msg.phone}
+                        </p>
+                      )}
+                      <div className="border border-[#00AAFF]/10 rounded-sm p-4 bg-[#0d0f12]">
+                        <p className="font-['JetBrains_Mono'] text-sm text-[#d4d8e8]/75 leading-relaxed whitespace-pre-wrap">{msg.message}</p>
+                      </div>
+                      {!msg.read && (
+                        <button
+                          onClick={() => markMessageRead(msg.id)}
+                          className="self-start font-['JetBrains_Mono'] text-[11px] text-purple-400/70 hover:text-purple-400 transition-colors flex items-center gap-1.5"
+                        >
+                          <Check size={12} /> Σήμανση ως αναγνωσμένο
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         )}
       </main>
