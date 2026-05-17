@@ -27,8 +27,9 @@ COPY --from=builder /app/public                  ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static     ./.next/static
 
-# Ensure data dir exists and is writable (JSON file storage)
-RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+# Ensure data and uploads dirs exist and are writable
+RUN mkdir -p /app/data /app/public/uploads \
+ && chown nextjs:nodejs /app/data /app/public/uploads
 
 USER nextjs
 EXPOSE 3000

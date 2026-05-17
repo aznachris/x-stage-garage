@@ -9,7 +9,9 @@ services:
       ADMIN_PASSWORD: stagex2024
     volumes:
       - stagex_data:/app/data
+      - stagex_uploads:/app/public/uploads
     restart: unless-stopped
 
 volumes:
   stagex_data:
+  stagex_uploads:
