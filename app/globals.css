@@ -124,3 +124,57 @@ h1, h2, h3, h4, h5, h6 {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* react-day-picker dark/neon overrides */
+.booking-cal {
+  --rdp-accent-color: #00AAFF;
+  --rdp-accent-background-color: rgba(0, 170, 255, 0.15);
+  --rdp-day_button-border-radius: 2px;
+  --rdp-day-height: 2.4rem;
+  --rdp-day-width: 2.4rem;
+}
+.booking-cal .rdp-root {
+  color: #d4d8e8;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+}
+.booking-cal .rdp-caption_label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #fff;
+}
+.booking-cal .rdp-weekday {
+  color: rgba(0, 170, 255, 0.5);
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+}
+.booking-cal .rdp-day_button:hover:not(:disabled) {
+  background: rgba(0, 170, 255, 0.12);
+  border-color: rgba(0, 170, 255, 0.4);
+}
+.booking-cal .rdp-selected .rdp-day_button {
+  background: #00AAFF;
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 0 10px #00AAFF60;
+}
+.booking-cal .rdp-today:not(.rdp-selected) .rdp-day_button {
+  border-color: rgba(0, 170, 255, 0.5);
+  color: #00AAFF;
+}
+.booking-cal .rdp-outside .rdp-day_button {
+  opacity: 0.2;
+}
+.booking-cal .rdp-disabled .rdp-day_button {
+  opacity: 0.15;
+  cursor: not-allowed;
+}
+.booking-cal .rdp-nav button {
+  color: rgba(0, 170, 255, 0.6);
+  transition: color 0.2s;
+}
+.booking-cal .rdp-nav button:hover {
+  color: #00AAFF;
+}
