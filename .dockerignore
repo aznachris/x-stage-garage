@@ -11,6 +11,8 @@ coverage
 .env*
 !.env.example
 
+data
+
 Dockerfile
 .dockerignore
 docker-compose*.yml
