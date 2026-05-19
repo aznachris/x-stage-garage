@@ -238,7 +238,6 @@ function MerchFormCard({ title, form, setForm, photoUrl, setPhotoUrl, onAddPhoto
         <div className="sm:col-span-2 flex flex-col gap-1"><label className="font-['JetBrains_Mono'] text-[10px] text-[#d4d8e8]/50 uppercase tracking-widest">Περιγραφή</label><textarea className="input-neon px-3 py-2 text-sm rounded-sm resize-none" rows={2} value={form.desc} onChange={(e) => setForm((f) => ({ ...f, desc: e.target.value }))} /></div>
         <div className="sm:col-span-2 flex flex-col gap-3">
           <label className="font-['JetBrains_Mono'] text-[10px] text-[#d4d8e8]/50 uppercase tracking-widest">Φωτογραφίες</label>
-          {form.photos.length > 0 && <MerchImageCarousel photos={form.photos} alt={form.name} heightClass="h-40" />}
           {form.photos.length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {form.photos.map((photo) => (
