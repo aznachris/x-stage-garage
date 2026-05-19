@@ -5,7 +5,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { DEFAULT_PROJECTS, type Project } from "@/lib/projects";
 
 export async function GET() {
-  const projects = readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
+  const projects = await readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
   return NextResponse.json(projects);
 }
 
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const projects = readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
+  const projects = await readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
 
   const p: Project = {
     id: genId(),
@@ -28,6 +28,6 @@ export async function POST(req: Request) {
     photos: [],
   };
 
-  writeJson("projects.json", [...projects, p]);
+  await writeJson("projects.json", [...projects, p]);
   return NextResponse.json(p, { status: 201 });
 }

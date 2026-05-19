@@ -67,10 +67,17 @@ export default function Lightbox({ project, initialIndex = 0, onClose }: Props) 
             </span>
           </div>
           <div className="flex items-center gap-3">
-            {photos.length > 0 && (
-              <span className="font-['JetBrains_Mono'] text-xs text-[#d4d8e8]/40">
-                {index + 1} / {photos.length}
-              </span>
+            {photos.length > 1 && (
+              <div className="flex items-center gap-1.5">
+                {photos.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      i === index ? "w-5 bg-[#00AAFF]/80" : "w-1.5 bg-white/25"
+                    }`}
+                  />
+                ))}
+              </div>
             )}
             <button onClick={onClose} className="w-8 h-8 flex items-center justify-center text-[#d4d8e8]/50 hover:text-white transition-colors border border-[#00AAFF]/15 hover:border-[#00AAFF]/40 rounded-sm">
               <X size={16} />

@@ -20,7 +20,7 @@ const DEFAULT: Availability = {
 };
 
 export async function GET() {
-  return NextResponse.json(readJson<Availability>("availability.json", DEFAULT));
+  return NextResponse.json(await readJson<Availability>("availability.json", DEFAULT));
 }
 
 export async function PUT(req: NextRequest) {
@@ -28,6 +28,6 @@ export async function PUT(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  writeJson("availability.json", { ...DEFAULT, ...body });
+  await writeJson("availability.json", { ...DEFAULT, ...body });
   return NextResponse.json(body);
 }

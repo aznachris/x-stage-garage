@@ -17,7 +17,7 @@ export interface Appointment {
 
 export async function GET(req: NextRequest) {
   const date = req.nextUrl.searchParams.get("date");
-  const appointments = readJson<Appointment[]>("appointments.json", []);
+  const appointments = await readJson<Appointment[]>("appointments.json", []);
 
   if (date) {
     const times = appointments
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const appointments = readJson<Appointment[]>("appointments.json", []);
+  const appointments = await readJson<Appointment[]>("appointments.json", []);
 
   const appointment: Appointment = {
     id: genId(),
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   };
 
   appointments.push(appointment);
-  writeJson("appointments.json", appointments);
+  await writeJson("appointments.json", appointments);
 
   return NextResponse.json(appointment, { status: 201 });
 }

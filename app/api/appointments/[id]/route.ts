@@ -10,13 +10,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const { id } = await params;
   const { status } = await req.json();
-  const appointments = readJson<Appointment[]>("appointments.json", []);
+  const appointments = await readJson<Appointment[]>("appointments.json", []);
   const idx = appointments.findIndex((a) => a.id === id);
 
   if (idx === -1) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   appointments[idx].status = status;
-  writeJson("appointments.json", appointments);
+  await writeJson("appointments.json", appointments);
 
   return NextResponse.json(appointments[idx]);
 }

@@ -6,14 +6,22 @@ import { format } from "date-fns";
 import { el as elLocale } from "date-fns/locale";
 import {
   LogOut, RefreshCw, Calendar, ShoppingBag, Settings, Check, X,
-  Package, Images, Plus, Trash2, Upload, Pencil, MessageSquare, Mail,
+  Package, Images, Plus, Trash2, Upload, Pencil, MessageSquare, Mail, Shirt, Download,
 } from "lucide-react";
+import {
+  exportAppointmentsToExcel,
+  exportOrdersToExcel,
+  exportMessagesToExcel,
+} from "@/lib/exportExcel";
 import type { Project } from "@/lib/projects";
+import type { MerchProduct } from "@/lib/merch";
+import { getStockStatus } from "@/lib/merch";
 import type { Message } from "@/app/api/messages/route";
+import MerchPanel from "@/app/admin/MerchPanel";
 
 type AppStatus = "pending" | "confirmed" | "cancelled";
 type OrderStatus = "new" | "processing" | "completed" | "cancelled";
-type Tab = "appointments" | "orders" | "availability" | "portfolio" | "messages";
+type Tab = "appointments" | "orders" | "merch" | "availability" | "portfolio" | "messages";
 
 interface Appointment {
   id: string; date: string; time: string; service: string;
@@ -54,6 +62,20 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+function ExportExcelButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="font-['JetBrains_Mono'] text-[11px] px-4 py-1.5 rounded-sm border border-[#00AAFF]/30 text-[#00AAFF] hover:bg-[#00AAFF]/08 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed sm:ml-auto"
+    >
+      <Download size={13} />
+      Excel
+    </button>
+  );
+}
+
 type ProjectForm = { title: string; category: "German" | "Japanese"; specs: string; description: string; year: string; color: string; accent: string };
 const BLANK_PROJECT: ProjectForm = { title: "", category: "German", specs: "", description: "", year: String(new Date().getFullYear()), color: "#1A2B3C", accent: "#00AAFF" };
 
@@ -61,6 +83,7 @@ export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("appointments");
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [merch, setMerch] = useState<MerchProduct[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [expandedMsgId, setExpandedMsgId] = useState<string | null>(null);
@@ -85,18 +108,20 @@ export default function Dashboard() {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [appsRes, ordersRes, availRes, projectsRes, msgsRes] = await Promise.all([
+    const [appsRes, ordersRes, merchRes, availRes, projectsRes, msgsRes] = await Promise.all([
       fetch("/api/appointments"),
       fetch("/api/orders"),
+      fetch("/api/products?all=1"),
       fetch("/api/availability"),
       fetch("/api/projects"),
       fetch("/api/messages"),
     ]);
-    const [apps, ords, av, projs, msgs] = await Promise.all([
-      appsRes.json(), ordersRes.json(), availRes.json(), projectsRes.json(), msgsRes.json(),
+    const [apps, ords, merchItems, av, projs, msgs] = await Promise.all([
+      appsRes.json(), ordersRes.json(), merchRes.json(), availRes.json(), projectsRes.json(), msgsRes.json(),
     ]);
     setAppointments(apps);
     setOrders(ords);
+    setMerch(merchItems);
     setAvail(av);
     setProjects(projs);
     setMessages(msgs);
@@ -200,6 +225,8 @@ export default function Dashboard() {
   const filteredOrders = orderFilter === "all" ? orders : orders.filter((o) => o.status === orderFilter);
   const pendingCount = appointments.filter((a) => a.status === "pending").length;
   const newOrdersCount = orders.filter((o) => o.status === "new").length;
+  const lowStockCount = merch.filter((p) => getStockStatus(p) === "low").length;
+  const outStockCount = merch.filter((p) => getStockStatus(p) === "out_of_stock").length;
   const unreadMsgCount = messages.filter((m) => !m.read).length;
 
   const inputCls = "input-neon h-10 px-3 text-sm rounded-sm w-full";
@@ -209,14 +236,10 @@ export default function Dashboard() {
       {/* Top bar */}
       <header className="border-b border-[#00AAFF]/10 px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between sticky top-0 bg-[#0d0f12]/95 backdrop-blur-md z-20">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
-            <svg viewBox="0 0 32 32" fill="none" className="w-7 h-7">
-              <rect width="32" height="32" fill="#000" />
-              <line x1="4" y1="4" x2="28" y2="28" stroke="#00AAFF" strokeWidth="4" strokeLinecap="round" />
-              <line x1="28" y1="4" x2="4" y2="28" stroke="#00AAFF" strokeWidth="4" strokeLinecap="round" />
-            </svg>
-            <span className="font-['Orbitron'] font-700 text-sm tracking-widest text-white hidden sm:block">
-              STAGE<span className="text-[#00AAFF]">X</span> <span className="text-[#d4d8e8]/40 text-xs">ADMIN</span>
+          <div className="flex items-center">
+            <span className="font-['Orbitron'] font-700 text-sm tracking-widest text-white">
+              Stage <span className="text-[#00AAFF]">X</span> Garage{" "}
+              <span className="text-[#d4d8e8]/40 text-xs font-normal tracking-wide">Admin</span>
             </span>
           </div>
           <div className="hidden md:flex items-center gap-4 ml-4 pl-4 border-l border-[#00AAFF]/10">
@@ -254,6 +277,7 @@ export default function Dashboard() {
           {([
             { key: "appointments" as Tab, label: "Ραντεβού", icon: Calendar, count: pendingCount },
             { key: "orders" as Tab, label: "Παραγγελίες", icon: ShoppingBag, count: newOrdersCount },
+            { key: "merch" as Tab, label: "Merch", icon: Shirt, count: lowStockCount + outStockCount },
             { key: "availability" as Tab, label: "Διαθεσιμότητα", icon: Settings, count: 0 },
             { key: "portfolio" as Tab, label: "Portfolio", icon: Images, count: 0 },
             { key: "messages" as Tab, label: "Μηνύματα", icon: MessageSquare, count: unreadMsgCount },
@@ -281,7 +305,7 @@ export default function Dashboard() {
         {/* ── Appointments ── */}
         {tab === "appointments" && (
           <div>
-            <div className="flex items-center gap-3 mb-6 flex-wrap">
+            <div className="flex items-center gap-3 mb-6 flex-wrap w-full">
               {(["all", "pending", "confirmed", "cancelled"] as const).map((f) => (
                 <button key={f} onClick={() => setAppFilter(f)}
                   className={`font-['JetBrains_Mono'] text-[11px] px-4 py-1.5 rounded-sm border transition-all ${appFilter === f ? "border-[#00AAFF] text-[#00AAFF] bg-[#00AAFF]/08" : "border-[#00AAFF]/15 text-[#d4d8e8]/40 hover:border-[#00AAFF]/40"}`}>
@@ -289,6 +313,10 @@ export default function Dashboard() {
                   {f !== "all" && <span className="ml-2 opacity-60">({appointments.filter((a) => a.status === f).length})</span>}
                 </button>
               ))}
+              <ExportExcelButton
+                onClick={() => exportAppointmentsToExcel(filteredApps)}
+                disabled={loading || filteredApps.length === 0}
+              />
             </div>
             {loading ? <p className="font-['JetBrains_Mono'] text-sm text-[#d4d8e8]/40">Φόρτωση...</p>
               : filteredApps.length === 0 ? (
@@ -344,7 +372,7 @@ export default function Dashboard() {
         {/* ── Orders ── */}
         {tab === "orders" && (
           <div>
-            <div className="flex items-center gap-3 mb-6 flex-wrap">
+            <div className="flex items-center gap-3 mb-6 flex-wrap w-full">
               {(["all", "new", "processing", "completed", "cancelled"] as const).map((f) => (
                 <button key={f} onClick={() => setOrderFilter(f)}
                   className={`font-['JetBrains_Mono'] text-[11px] px-4 py-1.5 rounded-sm border transition-all ${orderFilter === f ? "border-[#00AAFF] text-[#00AAFF] bg-[#00AAFF]/08" : "border-[#00AAFF]/15 text-[#d4d8e8]/40 hover:border-[#00AAFF]/40"}`}>
@@ -352,6 +380,10 @@ export default function Dashboard() {
                   {f !== "all" && <span className="ml-2 opacity-60">({orders.filter((o) => o.status === f).length})</span>}
                 </button>
               ))}
+              <ExportExcelButton
+                onClick={() => exportOrdersToExcel(filteredOrders)}
+                disabled={loading || filteredOrders.length === 0}
+              />
             </div>
             {loading ? <p className="font-['JetBrains_Mono'] text-sm text-[#d4d8e8]/40">Φόρτωση...</p>
               : filteredOrders.length === 0 ? (
@@ -406,6 +438,11 @@ export default function Dashboard() {
                 </div>
               )}
           </div>
+        )}
+
+        {/* ── Merch ── */}
+        {tab === "merch" && (
+          <MerchPanel products={merch} loading={loading} onRefresh={fetchAll} />
         )}
 
         {/* ── Availability ── */}
@@ -666,6 +703,12 @@ export default function Dashboard() {
         {/* ── Messages ── */}
         {tab === "messages" && (
           <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-end mb-2">
+              <ExportExcelButton
+                onClick={() => exportMessagesToExcel(messages)}
+                disabled={loading || messages.length === 0}
+              />
+            </div>
             {loading ? (
               <p className="font-['JetBrains_Mono'] text-sm text-[#d4d8e8]/40">Φόρτωση...</p>
             ) : messages.length === 0 ? (

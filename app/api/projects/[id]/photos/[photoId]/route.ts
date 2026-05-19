@@ -10,13 +10,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const { id, photoId } = await params;
   const { caption } = await req.json();
-  const projects = readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
+  const projects = await readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
   const updated = projects.map((p) =>
     p.id === id
       ? { ...p, photos: p.photos.map((ph) => ph.id === photoId ? { ...ph, caption } : ph) }
       : p
   );
-  writeJson("projects.json", updated);
+  await writeJson("projects.json", updated);
   return NextResponse.json({ ok: true });
 }
 
@@ -25,10 +25,10 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id, photoId } = await params;
-  const projects = readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
+  const projects = await readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
   const updated = projects.map((p) =>
     p.id === id ? { ...p, photos: p.photos.filter((ph) => ph.id !== photoId) } : p
   );
-  writeJson("projects.json", updated);
+  await writeJson("projects.json", updated);
   return NextResponse.json({ ok: true });
 }

@@ -17,13 +17,13 @@ export interface Message {
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const messages = readJson<Message[]>("messages.json", []);
+  const messages = await readJson<Message[]>("messages.json", []);
   return NextResponse.json(messages.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
 }
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const messages = readJson<Message[]>("messages.json", []);
+  const messages = await readJson<Message[]>("messages.json", []);
   const msg: Message = {
     id: genId(),
     name: body.name ?? "",
@@ -34,6 +34,6 @@ export async function POST(req: Request) {
     read: false,
     createdAt: new Date().toISOString(),
   };
-  writeJson("messages.json", [...messages, msg]);
+  await writeJson("messages.json", [...messages, msg]);
   return NextResponse.json(msg, { status: 201 });
 }

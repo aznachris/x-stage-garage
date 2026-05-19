@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Stage X Garage
 
-## Getting Started
+Next.js site with admin panel, booking, merch shop, and portfolio.
 
-First, run the development server:
+## Local development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). Admin: `/admin/login`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Without Azure env vars, data is stored under `./data/` and uploads under `./data/uploads/`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Docker
 
-## Learn More
+```bash
+docker compose up --build -d
+```
 
-To learn more about Next.js, take a look at the following resources:
+Dev profile with hot reload:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+docker compose --profile dev up
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Azure App Service + Blob Storage
 
-## Deploy on Vercel
+The app is ready for **Azure Web App (Linux)** with **Azure Blob Storage** for all persistent data.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Why Blob is required on Azure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+App Service local disk is **not durable** (restarts, scale-out). Without Blob:
+
+- Uploaded images are lost
+- JSON data (orders, appointments, merch, etc.) is lost
+
+When `AZURE_STORAGE_CONNECTION_STRING` is set, the app stores:
+
+| Container (default) | Content |
+|---------------------|---------|
+| `data` | `appointments.json`, `orders.json`, `products.json`, … |
+| `uploads` | Product & portfolio images |
+
+Image URLs stay `/uploads/<uuid>.png` (served via the app, works with private containers).
+
+### Azure setup checklist
+
+1. **Storage account** (StorageV2, LRS is fine)
+2. **App Service** (Linux, Node 22 LTS)
+3. **Application settings** (Configuration → Application settings):
+
+   | Name | Value |
+   |------|--------|
+   | `AZURE_STORAGE_CONNECTION_STRING` | Storage account connection string |
+   | `NEXTAUTH_URL` | `https://<your-app>.azurewebsites.net` |
+   | `NEXTAUTH_SECRET` | Long random string |
+   | `ADMIN_PASSWORD` | Admin login password |
+   | `PORT` | `3000` |
+   | `WEBSITES_PORT` | `3000` |
+
+4. **Deploy** (recommended: Docker from repo `Dockerfile`):
+
+   ```bash
+   az webapp create --resource-group <rg> --plan <plan> --name <app> \
+     --deployment-container-image-name <your-acr>/stagex-garage:latest
+   ```
+
+   Or build on App Service with startup command:
+
+   ```bash
+   node server.js
+   ```
+
+   (after `npm run build` with `output: "standalone"`)
+
+5. **Health check**: `GET https://<your-app>.azurewebsites.net/api/health`
+
+   ```json
+   { "ok": true, "storage": "azure-blob", "containers": { "data": "data", "uploads": "uploads" } }
+   ```
+
+### Migrate existing local data to Blob (optional)
+
+Upload each file from `./data/*.json` into the `data` container, and each file from `./data/uploads/` into the `uploads` container (same filenames). Use [Azure Storage Explorer](https://azure.microsoft.com/products/storage/storage-explorer/) or `az storage blob upload`.
+
+### Environment reference
+
+See [.env.example](.env.example).

@@ -12,11 +12,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { url, caption } = await req.json();
   if (!url) return NextResponse.json({ error: "url required" }, { status: 400 });
 
-  const projects = readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
+  const projects = await readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
   const photo = { id: genId(), url, caption: caption ?? "" };
   const updated = projects.map((p) =>
     p.id === id ? { ...p, photos: [...(p.photos ?? []), photo] } : p
   );
-  writeJson("projects.json", updated);
+  await writeJson("projects.json", updated);
   return NextResponse.json(photo, { status: 201 });
 }

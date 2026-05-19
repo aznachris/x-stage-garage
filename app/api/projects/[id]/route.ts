@@ -10,11 +10,11 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
   const { id } = await params;
   const body = await req.json();
-  const projects = readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
+  const projects = await readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
   const updated = projects.map((p) =>
     p.id === id ? { ...p, ...body, id: p.id, photos: p.photos } : p
   );
-  writeJson("projects.json", updated);
+  await writeJson("projects.json", updated);
   return NextResponse.json(updated.find((p) => p.id === id) ?? null);
 }
 
@@ -23,7 +23,7 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  const projects = readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
-  writeJson("projects.json", projects.filter((p) => p.id !== id));
+  const projects = await readJson<Project[]>("projects.json", DEFAULT_PROJECTS);
+  await writeJson("projects.json", projects.filter((p) => p.id !== id));
   return NextResponse.json({ ok: true });
 }

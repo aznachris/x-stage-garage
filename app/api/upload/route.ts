@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import fs from "fs";
-import path from "path";
 import { randomUUID } from "crypto";
+import { publicUploadUrl, saveUpload } from "@/lib/uploads";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -19,9 +18,7 @@ export async function POST(req: Request) {
   }
 
   const filename = `${randomUUID()}.${ext}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-  fs.writeFileSync(path.join(uploadDir, filename), Buffer.from(await file.arrayBuffer()));
+  await saveUpload(filename, Buffer.from(await file.arrayBuffer()));
 
-  return NextResponse.json({ url: `/uploads/${filename}` });
+  return NextResponse.json({ url: publicUploadUrl(filename) });
 }
