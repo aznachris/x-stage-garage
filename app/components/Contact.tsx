@@ -140,7 +140,8 @@ export default function Contact() {
                     </label>
                     <input id="name" type="text" required autoComplete="name"
                       className="input-neon h-11 px-4 text-sm rounded-sm" placeholder="John Doe"
-                      value={form.name} onChange={(e) => handleChange("name", e.target.value)} />
+                      value={form.name} onChange={(e) => handleChange("name", e.target.value)}
+                      suppressHydrationWarning />
                     {errors.name && <p className="font-['JetBrains_Mono'] text-[10px] text-red-400">{errors.name}</p>}
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -149,7 +150,8 @@ export default function Contact() {
                     </label>
                     <input id="email" type="email" required autoComplete="email"
                       className="input-neon h-11 px-4 text-sm rounded-sm" placeholder="john@example.com"
-                      value={form.email} onChange={(e) => handleChange("email", e.target.value)} />
+                      value={form.email} onChange={(e) => handleChange("email", e.target.value)}
+                      suppressHydrationWarning />
                     {errors.email && <p className="font-['JetBrains_Mono'] text-[10px] text-red-400">{errors.email}</p>}
                   </div>
                 </div>
@@ -160,7 +162,8 @@ export default function Contact() {
                   </label>
                   <input id="phone" type="tel" autoComplete="tel"
                     className="input-neon h-11 px-4 text-sm rounded-sm" placeholder="+1 (555) 000-0000"
-                    value={form.phone} onChange={(e) => handleChange("phone", e.target.value)} />
+                    value={form.phone} onChange={(e) => handleChange("phone", e.target.value)}
+                    suppressHydrationWarning />
                 </div>
 
                 <div className="flex flex-col gap-1.5">

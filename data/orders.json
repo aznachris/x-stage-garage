@@ -13,7 +13,41 @@
     "email": "aznachris@gmail.com",
     "phone": "6943400359",
     "address": "test 72",
-    "status": "new",
+    "status": "completed",
     "createdAt": "2026-05-17T16:30:47.821Z"
+  },
+  {
+    "id": "482c44dc-ff47-4464-b3f0-01a5719b423c",
+    "items": [
+      {
+        "name": "Metal Keyring",
+        "price": 18,
+        "qty": 1
+      }
+    ],
+    "total": 18,
+    "name": "Chris AZNAOURIDIS",
+    "email": "aznachris@gmail.com",
+    "phone": "+306943400359",
+    "address": "Plataion 72",
+    "status": "processing",
+    "createdAt": "2026-05-18T10:45:51.130Z"
+  },
+  {
+    "id": "192be152-bfe8-4997-a1b2-d94e92426045",
+    "items": [
+      {
+        "name": "Stage X Cap",
+        "price": 35,
+        "qty": 1
+      }
+    ],
+    "total": 35,
+    "name": "chris azna",
+    "email": "aznachris@gmail.com",
+    "phone": "+306943400359",
+    "address": "Plataion 72",
+    "status": "new",
+    "createdAt": "2026-05-18T17:54:11.006Z"
   }
 ]

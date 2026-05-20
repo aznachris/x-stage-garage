@@ -1,0 +1,96 @@
+[
+  {
+    "id": "hoodie",
+    "name": "Stage X Hoodie",
+    "price": 65,
+    "tag": "BESTSELLER",
+    "desc": "Premium heavyweight fleece, embroidered logo",
+    "stock": 4,
+    "lowStockThreshold": 5,
+    "photos": [
+      {
+        "id": "c62cf64e-37f9-4745-8f4b-4b5d5e8b7d3d",
+        "url": "/uploads/1aeca897-aa16-4e69-8328-b3d1f09d9ec3.png",
+        "caption": ""
+      },
+      {
+        "id": "4d1dfb85-b816-4830-9a27-e2f9fcbac438",
+        "url": "/uploads/7281e841-86cc-4630-8567-6393702fd7a4.png",
+        "caption": ""
+      },
+      {
+        "id": "897dd3e7-fb4c-4f6a-a1bc-a048f682606b",
+        "url": "/uploads/8779f49d-ab3e-4a08-b5bf-2d2b08815b14.png",
+        "caption": ""
+      }
+    ],
+    "active": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "image": "/uploads/1aeca897-aa16-4e69-8328-b3d1f09d9ec3.png"
+  },
+  {
+    "id": "cap",
+    "name": "Stage X Cap",
+    "price": 35,
+    "tag": "NEW",
+    "desc": "Structured 6-panel, adjustable strap",
+    "stock": 18,
+    "lowStockThreshold": 5,
+    "photos": [],
+    "active": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "image": ""
+  },
+  {
+    "id": "sticker",
+    "name": "Sticker Pack × 8",
+    "price": 12,
+    "tag": "POPULAR",
+    "desc": "Die-cut vinyl, weatherproof, UV resistant",
+    "stock": 50,
+    "lowStockThreshold": 10,
+    "photos": [],
+    "active": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "image": ""
+  },
+  {
+    "id": "tee",
+    "name": "Stage X Tee",
+    "price": 45,
+    "tag": "CLASSIC",
+    "desc": "100% cotton, oversized fit, screen printed",
+    "stock": 30,
+    "lowStockThreshold": 5,
+    "photos": [],
+    "active": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "image": ""
+  },
+  {
+    "id": "keyring",
+    "name": "Metal Keyring",
+    "price": 18,
+    "tag": "DETAIL",
+    "desc": "CNC machined aluminium, laser engraved",
+    "stock": 40,
+    "lowStockThreshold": 8,
+    "photos": [],
+    "active": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "image": ""
+  },
+  {
+    "id": "decal",
+    "name": "Window Decal",
+    "price": 8,
+    "tag": "ESSENTIALS",
+    "desc": "High-quality vinyl, easy apply / remove",
+    "stock": 60,
+    "lowStockThreshold": 15,
+    "photos": [],
+    "active": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "image": ""
+  }
+]

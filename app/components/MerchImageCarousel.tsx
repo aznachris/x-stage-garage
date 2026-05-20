@@ -15,6 +15,7 @@ interface MerchImageCarouselProps {
   heightClass?: string;
   placeholder?: React.ReactNode;
   showArrows?: boolean;
+  onPhotoClick?: (index: number) => void;
 }
 
 export default function MerchImageCarousel({
@@ -24,6 +25,7 @@ export default function MerchImageCarousel({
   heightClass = "h-48",
   placeholder,
   showArrows = true,
+  onPhotoClick,
 }: MerchImageCarouselProps) {
   const items = photos.filter((p) => p.url);
   const [index, setIndex] = useState(0);
@@ -68,7 +70,8 @@ export default function MerchImageCarousel({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.18 }}
-          className="absolute inset-0 w-full h-full object-cover"
+          onClick={() => onPhotoClick?.(safeIndex)}
+          className={`absolute inset-0 w-full h-full object-cover ${onPhotoClick ? "cursor-zoom-in" : ""}`}
         />
       </AnimatePresence>
 

@@ -4,8 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, X, Plus, Minus, CheckCheck } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import type { MerchProduct } from "@/lib/merch";
-import { getStockStatus } from "@/lib/merch";
+import { getStockStatus, getProductPhotos } from "@/lib/merch";
 import StockBubble from "@/app/components/StockBubble";
+import MerchImageCarousel from "@/app/components/MerchImageCarousel";
+import MerchLightbox from "@/app/components/MerchLightbox";
 
 interface CartItem extends MerchProduct {
   qty: number;
@@ -29,6 +31,7 @@ export default function Shop() {
   const [orderError, setOrderError] = useState("");
   const [ordering, setOrdering] = useState(false);
   const [ordered, setOrdered] = useState(false);
+  const [lightbox, setLightbox] = useState<{ product: MerchProduct; index: number } | null>(null);
 
   const loadProducts = useCallback(async () => {
     setLoadingProducts(true);
@@ -193,14 +196,13 @@ export default function Shop() {
                     transition={{ duration: 0.5, delay: i * 0.08 }}
                     className={`glass-card glow-card rounded-sm p-6 flex flex-col gap-4 transition-all duration-300 ${soldOut ? "opacity-75" : ""}`}
                   >
-                    <div className="relative h-48 bg-gradient-to-br from-[#00AAFF]/06 via-[#0d0f12] to-[#0d0f12] border border-[#00AAFF]/10 rounded-sm overflow-hidden flex items-end justify-start p-3">
-                      {p.image ? (
-                        <img src={p.image} alt={p.name} className="absolute inset-0 w-full h-full object-cover" />
-                      ) : (
-                        <span className="font-['Orbitron'] text-[9px] font-700 tracking-[0.3em] text-[#00AAFF]/18 uppercase relative z-10">
-                          Stage X Garage
-                        </span>
-                      )}
+                    <div className="relative">
+                      <MerchImageCarousel
+                        photos={getProductPhotos(p).map((ph) => ({ id: ph.id, url: ph.url }))}
+                        alt={p.name}
+                        heightClass="h-48"
+                        onPhotoClick={(idx) => setLightbox({ product: p, index: idx })}
+                      />
                       {status !== "in_stock" && (
                         <div className="absolute top-3 right-3 z-10">
                           <StockBubble status={status} stock={status === "low" ? p.stock : undefined} size="md" />
@@ -238,6 +240,18 @@ export default function Shop() {
           )}
         </div>
       </section>
+
+      {/* Merch photo lightbox */}
+      <AnimatePresence>
+        {lightbox && (
+          <MerchLightbox
+            photos={getProductPhotos(lightbox.product)}
+            productName={lightbox.product.name}
+            initialIndex={lightbox.index}
+            onClose={() => setLightbox(null)}
+          />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {cartOpen && (
