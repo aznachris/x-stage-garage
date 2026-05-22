@@ -61,10 +61,12 @@ export default function Lightbox({ project, initialIndex = 0, onClose }: Props) 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="font-['Orbitron'] font-black text-sm text-white tracking-wide">{project.title}</span>
-            <span className="font-['JetBrains_Mono'] text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-sm border"
-              style={{ color: project.accent, borderColor: `${project.accent}40`, background: `${project.accent}15` }}>
-              {project.category}
-            </span>
+            {project.brand && (
+              <span className="font-['JetBrains_Mono'] text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-sm border"
+                style={{ color: project.accent, borderColor: `${project.accent}40`, background: `${project.accent}15` }}>
+                {project.brand}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-3">
             {photos.length > 1 && (

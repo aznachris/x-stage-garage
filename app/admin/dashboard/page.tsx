@@ -76,8 +76,17 @@ function ExportExcelButton({ onClick, disabled }: { onClick: () => void; disable
   );
 }
 
-type ProjectForm = { title: string; category: "German" | "Japanese"; specs: string; description: string; year: string; color: string; accent: string };
-const BLANK_PROJECT: ProjectForm = { title: "", category: "German", specs: "", description: "", year: String(new Date().getFullYear()), color: "#1A2B3C", accent: "#00AAFF" };
+type ProjectForm = { title: string; brand: string; specs: string; description: string; year: string; color: string; accent: string };
+const BLANK_PROJECT: ProjectForm = { title: "", brand: "", specs: "", description: "", year: String(new Date().getFullYear()), color: "#1A2B3C", accent: "#00AAFF" };
+
+const BRAND_SUGGESTIONS = [
+  "Acura", "Alfa Romeo", "AMG", "Aston Martin", "Audi",
+  "BMW", "Cadillac", "Chevrolet", "Ferrari", "Ford",
+  "Honda", "Hyundai", "Infiniti", "Jaguar", "Kia",
+  "Lamborghini", "Lexus", "Maserati", "Mazda", "McLaren",
+  "Mercedes", "MINI", "Mitsubishi", "Nissan", "Opel",
+  "Porsche", "SEAT", "Škoda", "Subaru", "Toyota", "Volkswagen",
+];
 
 export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("appointments");
@@ -522,11 +531,17 @@ export default function Dashboard() {
                     <input className={inputCls} value={newProject.title} onChange={(e) => setNewProject((f) => ({ ...f, title: e.target.value }))} placeholder="BMW M3 E92" />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="font-['JetBrains_Mono'] text-[10px] text-[#d4d8e8]/50 uppercase tracking-widest">Κατηγορία</label>
-                    <select className={inputCls + " appearance-none"} value={newProject.category} onChange={(e) => setNewProject((f) => ({ ...f, category: e.target.value as "German" | "Japanese" }))}>
-                      <option value="German" style={{ background: "#0d0f12" }}>German</option>
-                      <option value="Japanese" style={{ background: "#0d0f12" }}>Japanese</option>
-                    </select>
+                    <label className="font-['JetBrains_Mono'] text-[10px] text-[#d4d8e8]/50 uppercase tracking-widest">Μάρκα</label>
+                    <input
+                      className={inputCls}
+                      list="brand-suggestions-new"
+                      value={newProject.brand}
+                      onChange={(e) => setNewProject((f) => ({ ...f, brand: e.target.value }))}
+                      placeholder="BMW, Toyota, Porsche…"
+                    />
+                    <datalist id="brand-suggestions-new">
+                      {BRAND_SUGGESTIONS.map((b) => <option key={b} value={b} />)}
+                    </datalist>
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="font-['JetBrains_Mono'] text-[10px] text-[#d4d8e8]/50 uppercase tracking-widest">Specs</label>
@@ -572,7 +587,7 @@ export default function Dashboard() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-['Orbitron'] text-sm font-700 text-white">{project.title}</span>
-                      <span className="font-['JetBrains_Mono'] text-[9px] border px-1.5 py-0.5 rounded-sm" style={{ color: project.accent, borderColor: `${project.accent}40` }}>{project.category}</span>
+                      {project.brand && <span className="font-['JetBrains_Mono'] text-[9px] border px-1.5 py-0.5 rounded-sm" style={{ color: project.accent, borderColor: `${project.accent}40` }}>{project.brand}</span>}
                       <span className="font-['JetBrains_Mono'] text-[10px] text-[#d4d8e8]/30">{project.year}</span>
                     </div>
                     <p className="font-['JetBrains_Mono'] text-[11px] text-[#00AAFF]/50 mt-0.5">{project.specs}</p>
@@ -581,7 +596,7 @@ export default function Dashboard() {
                     <span className="font-['JetBrains_Mono'] text-xs text-[#d4d8e8]/40 flex items-center gap-1.5">
                       <Images size={12} /> {project.photos.length}
                     </span>
-                    <button onClick={(e) => { e.stopPropagation(); setEditingId(project.id); setEditForm({ title: project.title, category: project.category, specs: project.specs, description: project.description, year: project.year, color: project.color, accent: project.accent }); setExpandedId(project.id); }}
+                    <button onClick={(e) => { e.stopPropagation(); setEditingId(project.id); setEditForm({ title: project.title, brand: project.brand ?? "", specs: project.specs, description: project.description, year: project.year, color: project.color, accent: project.accent }); setExpandedId(project.id); }}
                       className="w-8 h-8 flex items-center justify-center text-[#d4d8e8]/30 hover:text-[#00AAFF] transition-colors border border-transparent hover:border-[#00AAFF]/30 rounded-sm">
                       <Pencil size={13} />
                     </button>
@@ -606,11 +621,17 @@ export default function Dashboard() {
                             <input className={inputCls} value={editForm.title} onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))} />
                           </div>
                           <div className="flex flex-col gap-1">
-                            <label className="font-['JetBrains_Mono'] text-[10px] text-[#d4d8e8]/50 uppercase tracking-widest">Κατηγορία</label>
-                            <select className={inputCls + " appearance-none"} value={editForm.category} onChange={(e) => setEditForm((f) => ({ ...f, category: e.target.value as "German" | "Japanese" }))}>
-                              <option value="German" style={{ background: "#0d0f12" }}>German</option>
-                              <option value="Japanese" style={{ background: "#0d0f12" }}>Japanese</option>
-                            </select>
+                            <label className="font-['JetBrains_Mono'] text-[10px] text-[#d4d8e8]/50 uppercase tracking-widest">Μάρκα</label>
+                            <input
+                              className={inputCls}
+                              list="brand-suggestions-edit"
+                              value={editForm.brand}
+                              onChange={(e) => setEditForm((f) => ({ ...f, brand: e.target.value }))}
+                              placeholder="BMW, Toyota, Porsche…"
+                            />
+                            <datalist id="brand-suggestions-edit">
+                              {BRAND_SUGGESTIONS.map((b) => <option key={b} value={b} />)}
+                            </datalist>
                           </div>
                           <div className="flex flex-col gap-1">
                             <label className="font-['JetBrains_Mono'] text-[10px] text-[#d4d8e8]/50 uppercase tracking-widest">Specs</label>

@@ -24,7 +24,8 @@
         "url": "/uploads/013069a6-2e4b-4dfb-afcd-78fd3f034bac.png",
         "caption": "test 3"
       }
-    ]
+    ],
+    "brand": "BMW"
   },
   {
     "id": "2",
@@ -35,7 +36,8 @@
     "color": "#0D1A0D",
     "accent": "#00FF88",
     "year": "2024",
-    "photos": []
+    "photos": [],
+    "brand": "Lexus"
   },
   {
     "id": "3",

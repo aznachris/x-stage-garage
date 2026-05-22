@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   const p: Project = {
     id: genId(),
     title: body.title ?? "",
-    category: body.category ?? "German",
+    brand: body.brand ?? "",
     specs: body.specs ?? "",
     description: body.description ?? "",
     color: body.color ?? "#1A2B3C",

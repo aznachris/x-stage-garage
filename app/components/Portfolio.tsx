@@ -4,13 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Images } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import Lightbox from "./Lightbox";
+import BrandLogo from "./BrandLogo";
 import { DEFAULT_PROJECTS, type Project } from "@/lib/projects";
-
-type Category = "All" | "German" | "Japanese";
 
 export default function Portfolio() {
   const { t } = useTranslation();
-  const [active, setActive] = useState<Category>("All");
+  const [active, setActive] = useState<string>("All");
   const [projects, setProjects] = useState<Project[]>(DEFAULT_PROJECTS);
   const [lightbox, setLightbox] = useState<{ project: Project; index: number } | null>(null);
 
@@ -21,19 +20,10 @@ export default function Portfolio() {
       .catch(() => {});
   }, []);
 
-  const filtered = active === "All" ? projects : projects.filter((p) => p.category === active);
+  // Derive unique brands from loaded projects, sorted alphabetically
+  const brands = Array.from(new Set(projects.map((p) => p.brand).filter(Boolean))).sort();
 
-  const filterLabels: Record<Category, string> = {
-    All: t("portfolio.filter.all"),
-    German: t("portfolio.filter.german"),
-    Japanese: t("portfolio.filter.japanese"),
-  };
-
-  const categoryLabels: Record<Category, string> = {
-    All: t("portfolio.filter.all"),
-    German: t("portfolio.filter.german"),
-    Japanese: t("portfolio.filter.japanese"),
-  };
+  const filtered = active === "All" ? projects : projects.filter((p) => p.brand === active);
 
   return (
     <>
@@ -57,23 +47,33 @@ export default function Portfolio() {
             </h2>
           </motion.div>
 
-          {/* Filter tabs */}
-          <div className="flex justify-center gap-2 mb-12" role="tablist" aria-label="Filter projects">
-            {(["All", "German", "Japanese"] as Category[]).map((cat) => (
-              <button
-                key={cat}
-                role="tab"
-                aria-selected={active === cat}
-                onClick={() => setActive(cat)}
-                className={`font-['Orbitron'] text-xs font-700 tracking-widest uppercase px-6 py-3 rounded-sm border transition-all duration-200 cursor-pointer ${
-                  active === cat
-                    ? "bg-[#00AAFF] text-black border-[#00AAFF] shadow-[0_0_20px_#00AAFF60]"
-                    : "bg-transparent text-[#00AAFF]/60 border-[#00AAFF]/20 hover:border-[#00AAFF]/50 hover:text-[#00AAFF]"
-                }`}
-              >
-                {filterLabels[cat]}
-              </button>
-            ))}
+          {/* Filter tabs — dynamic per brand */}
+          <div className="flex flex-wrap justify-center gap-2 mb-12" role="tablist" aria-label="Filter by brand">
+            {["All", ...brands].map((brand) => {
+              const isActive = active === brand;
+              return (
+                <button
+                  key={brand}
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActive(brand)}
+                  className={`font-['Orbitron'] text-xs font-700 tracking-widest uppercase px-4 py-2.5 rounded-sm border transition-all duration-200 cursor-pointer flex items-center gap-2 ${
+                    isActive
+                      ? "bg-[#00AAFF] text-black border-[#00AAFF] shadow-[0_0_20px_#00AAFF60]"
+                      : "bg-transparent text-[#00AAFF]/60 border-[#00AAFF]/20 hover:border-[#00AAFF]/50 hover:text-[#00AAFF]"
+                  }`}
+                >
+                  {brand !== "All" && (
+                    <BrandLogo
+                      brand={brand}
+                      size={15}
+                      className={isActive ? "text-black" : "text-[#00AAFF]/70"}
+                    />
+                  )}
+                  <span>{brand === "All" ? t("portfolio.filter.all") : brand}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Grid */}
@@ -126,12 +126,16 @@ export default function Portfolio() {
                       </div>
                     )}
 
-                    <span
-                      className="absolute top-3 right-3 font-['Orbitron'] text-[10px] font-700 tracking-widest uppercase px-2 py-1 rounded-sm"
-                      style={{ background: `${p.accent}20`, border: `1px solid ${p.accent}40`, color: p.accent }}
-                    >
-                      {categoryLabels[p.category]}
-                    </span>
+                    {/* Brand badge */}
+                    {p.brand && (
+                      <span
+                        className="absolute top-3 right-3 font-['Orbitron'] text-[10px] font-700 tracking-widest uppercase px-2 py-1 rounded-sm flex items-center gap-1.5"
+                        style={{ background: `${p.accent}20`, border: `1px solid ${p.accent}40`, color: p.accent }}
+                      >
+                        <BrandLogo brand={p.brand} size={11} />
+                        {p.brand}
+                      </span>
+                    )}
                     <span className="absolute bottom-3 left-3 font-['JetBrains_Mono'] text-[10px] text-white/30">
                       {p.year}
                     </span>
